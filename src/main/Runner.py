@@ -1,93 +1,70 @@
-import random as rd
 import numpy as np
-import math
 
-x = np.array([
-    [0, 0, 0],
-    [0, 0, 1],
-    [0, 1, 0],
-    [0, 1, 1],
-    [1, 0, 0],
-    [1, 0, 1],
-    [1, 1, 0],
-    [1, 1, 1]
-])
+# https://towardsdatascience.com/implementing-the-xor-gate-using-backpropagation-in-neural-networks-c1f255b4f20d
 
-# A
-#y_out = np.array([0, 0, 0, 0, 1, 1, 1, 1])
-
-# A xor B !not working
-y_out = np.array([0, 0, 1, 1, 1, 1, 0, 0])
-
-# B and C ! fails for some
-#y_out = np.array([0, 0, 0, 1, 0, 0, 0, 1])
-
-# A or B or C
-#y_out = np.array([0, 1, 1, 1, 1, 1, 1, 1])
-
-# A and B and C
-#y_out = np.array([0, 0, 0, 0, 0, 0, 0, 1])
-
-# y_out = np.array([
-#     [1, 0, 0, 1],
-#     [0, 1, 0, 1],
-#     [1, 0, 0, 0]
-# ])
-
-def sigmoid_function(x):
-    return 1 / (1 + math.exp(-x))
+def sigmoid(x):
+    return 1 / (1 + np.exp(-x))
 
 
-sigmoid = np.vectorize(lambda t: sigmoid_function(t))
-sigmoid_deriv = np.vectorize(lambda t: sigmoid_function(t) - (1 - sigmoid_function(t)))
+def sigmoid_derivative(x):
+    return x * (1 - x)
 
 
-def feed_forward(w, x):
-    sum1 = np.dot(x, w)
-    return sigmoid(sum1)
+# Input datasets
+inputs = np.array([[0, 0], [0, 1], [1, 0], [1, 1]])
+expected_output = np.array([[0], [1], [1], [0]])
 
+epochs = 10000
+lr = 0.1
+inputLayerNeurons, hiddenLayerNeurons, outputLayerNeurons = 2, 2, 1
 
-def back_propagation(y_out, y, w, x):
-    errors = y_out - y
-    delta = errors * sigmoid_deriv(y)
-    return w + np.dot(np.transpose(x), delta)
+# Random weights and bias initialization
+hidden_weights = np.random.uniform(size=(inputLayerNeurons, hiddenLayerNeurons))
+hidden_bias = np.random.uniform(size=(1, hiddenLayerNeurons))
+output_weights = np.random.uniform(size=(hiddenLayerNeurons, outputLayerNeurons))
+output_bias = np.random.uniform(size=(1, outputLayerNeurons))
 
+print("Initial hidden weights: ", end='')
+print(*hidden_weights)
+print("Initial hidden biases: ", end='')
+print(*hidden_bias)
+print("Initial output weights: ", end='')
+print(*output_weights)
+print("Initial output biases: ", end='')
+print(*output_bias)
 
-w = np.array([rd.random(), rd.random(), rd.random()])
-# w = np.array([
-#     [rd.random(), rd.random(), rd.random()],
-#     [rd.random(), rd.random(), rd.random()],
-#     [rd.random(), rd.random(), rd.random()]
-# ])
+# Training algorithm
+for _ in range(epochs):
+    # Forward Propagation
+    hidden_layer_activation = np.dot(inputs, hidden_weights)
+    hidden_layer_activation += hidden_bias
+    hidden_layer_output = sigmoid(hidden_layer_activation)
 
-for i in range(100000):
-    y = feed_forward(w, x)
-    w = back_propagation(y_out, y, w, x)
+    output_layer_activation = np.dot(hidden_layer_output, output_weights)
+    output_layer_activation += output_bias
+    predicted_output = sigmoid(output_layer_activation)
 
-print(w)
+    # Backpropagation
+    error = expected_output - predicted_output
+    d_predicted_output = error * sigmoid_derivative(predicted_output)
 
-print("-------")
-print("0 1 1")
-final_problem = feed_forward(w, [0, 1, 1])
-print(final_problem)
+    error_hidden_layer = d_predicted_output.dot(output_weights.T)
+    d_hidden_layer = error_hidden_layer * sigmoid_derivative(hidden_layer_output)
 
-result = 1 if final_problem > 0.5 else 0
-print(result)
+    # Updating Weights and Biases
+    output_weights += hidden_layer_output.T.dot(d_predicted_output) * lr
+    output_bias += np.sum(d_predicted_output, axis=0, keepdims=True) * lr
+    hidden_weights += inputs.T.dot(d_hidden_layer) * lr
+    hidden_bias += np.sum(d_hidden_layer, axis=0, keepdims=True) * lr
 
+print("Final hidden weights: ", end='')
+print(*hidden_weights)
+print("Final hidden bias: ", end='')
+print(*hidden_bias)
+print("Final output weights: ", end='')
+print(*output_weights)
+print("Final output bias: ", end='')
+print(*output_bias)
 
-print("-------")
-print("0 1 0")
-final_problem = feed_forward(w, [0, 1, 0])
-print(final_problem)
-
-result = 1 if final_problem > 0.5 else 0
-print(result)
-
-
-print("-------")
-print("1 0 1")
-final_problem = feed_forward(w, [1, 0, 1])
-print(final_problem)
-
-result = 1 if final_problem > 0.5 else 0
-print(result)
+print("\nOutput from neural network after 10,000 epochs: ", end='')
+print(*predicted_output)
