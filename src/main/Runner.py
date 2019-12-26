@@ -1,4 +1,6 @@
 import numpy as np
+import plotly.express as px
+import pandas as pd
 
 # https://towardsdatascience.com/implementing-the-xor-gate-using-backpropagation-in-neural-networks-c1f255b4f20d
 
@@ -11,12 +13,26 @@ def sigmoid_derivative(x):
 
 
 # Input datasets
-inputs = np.array([[0, 0], [0, 1], [1, 0], [1, 1]])
-expected_output = np.array([[0], [1], [1], [0]])
+inputs = np.array(
+    [
+        [0, 0],
+        [0, 1],
+        [1, 0],
+        [1, 1]
+    ]
+)
+expected_output = np.array(
+    [
+        [0, 0],
+        [1, 1],
+        [1, 1],
+        [0, 1]
+    ]
+)
 
 epochs = 10000
 lr = 0.1
-inputLayerNeurons, hiddenLayerNeurons, outputLayerNeurons = 2, 2, 1
+inputLayerNeurons, hiddenLayerNeurons, outputLayerNeurons = 2, 2, 2
 
 # Random weights and bias initialization
 hidden_weights = np.random.uniform(size=(inputLayerNeurons, hiddenLayerNeurons))
@@ -24,17 +40,10 @@ hidden_bias = np.random.uniform(size=(1, hiddenLayerNeurons))
 output_weights = np.random.uniform(size=(hiddenLayerNeurons, outputLayerNeurons))
 output_bias = np.random.uniform(size=(1, outputLayerNeurons))
 
-print("Initial hidden weights: ", end='')
-print(*hidden_weights)
-print("Initial hidden biases: ", end='')
-print(*hidden_bias)
-print("Initial output weights: ", end='')
-print(*output_weights)
-print("Initial output biases: ", end='')
-print(*output_bias)
+accuracy = [[],[]]
 
 # Training algorithm
-for _ in range(epochs):
+for count in range(epochs):
     # Forward Propagation
     hidden_layer_activation = np.dot(inputs, hidden_weights)
     hidden_layer_activation += hidden_bias
@@ -47,6 +56,9 @@ for _ in range(epochs):
     # Backpropagation
     error = expected_output - predicted_output
     d_predicted_output = error * sigmoid_derivative(predicted_output)
+
+    accuracy[0].append(count)
+    accuracy[1].append(-1 * error[0, 0])
 
     error_hidden_layer = d_predicted_output.dot(output_weights.T)
     d_hidden_layer = error_hidden_layer * sigmoid_derivative(hidden_layer_output)
@@ -68,3 +80,6 @@ print(*output_bias)
 
 print("\nOutput from neural network after 10,000 epochs: ", end='')
 print(*predicted_output)
+
+fig = px.line(x=accuracy[0], y=accuracy[1])
+fig.show()
