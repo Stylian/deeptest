@@ -1,8 +1,9 @@
 
-to generatlize in class and file this as a 1 hidden layer level problem
-and to run experiments
+added python3-pip debian package
+added tensorflow with pip
+maybe add package file ? __setup.py__ --- something like this
 
-to add more outputs /gates
-maybe some type of UI ?
+tensorflow ? or something with UI
+maybe some type of UI
 
 error per epoch graph to include

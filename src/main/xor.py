@@ -30,7 +30,7 @@ expected_output = np.array(
     ]
 )
 
-epochs = 10000
+epochs = 100000
 lr = 0.1
 inputLayerNeurons, hiddenLayerNeurons, outputLayerNeurons = 2, 2, 2
 
@@ -69,17 +69,48 @@ for count in range(epochs):
     hidden_weights += inputs.T.dot(d_hidden_layer) * lr
     hidden_bias += np.sum(d_hidden_layer, axis=0, keepdims=True) * lr
 
-print("Final hidden weights: ", end='')
-print(*hidden_weights)
-print("Final hidden bias: ", end='')
-print(*hidden_bias)
-print("Final output weights: ", end='')
-print(*output_weights)
-print("Final output bias: ", end='')
-print(*output_bias)
+
+row = 3
+print("")
+hid1 = hidden_weights[0, 0] * inputs[row, 0] + hidden_weights[1, 0] * inputs[row, 1]
+sum1 = hid1+hidden_bias[0, 0]
+sigm1 = sigmoid(sum1)
+print(str(inputs[row, 0]) + " -- " + str(hidden_weights[0, 0]) + " -- wx=" + str(hid1))
+print(str(inputs[row, 1]) + " -- " + str(hidden_weights[1, 0]) + " -- ||| "
+      + " | b=" + str(hidden_bias[0, 0]) + " ||| sum=" + str(sum1)
+      + " -> sigm=" + str(sigm1) + " (H1)")
+print("")
+hid2 = hidden_weights[0, 1] * inputs[row, 0] + hidden_weights[1, 1] * inputs[row, 1]
+sum2 = hid2+hidden_bias[0, 1]
+sigm2 = sigmoid(2)
+print(str(inputs[row, 0]) + " -- " + str(hidden_weights[0, 1]) + " -- wx=" + str(hid2))
+print(str(inputs[row, 1]) + " -- " + str(hidden_weights[1, 1]) + " -- ||| "
+      + " | b=" + str(hidden_bias[0, 1]) + " ||| sum=" + str(sum2)
+      + " -> sigm=" + str(sigm2) + " (H2)")
+
+print("")
+hid3 = output_weights[0, 0] * sigm1 + output_weights[1, 0] * sigm2
+sum3 = hid3+output_bias[0, 0]
+sigm3 = sigmoid(sum3)
+print("(H1)-" + str(sigm1) + " -- " + str(output_weights[0, 0]) + " -- wx=" + str(hid3))
+print("(H2)-" + str(sigm2) + " -- " + str(output_weights[1, 0]) + " -- ||| "
+      + " | b=" + str(output_bias[0, 0]) + " ||| sum=" + str(sum3)
+      + " -> sigm=" + str(sigm3))
+
+
+
+#
+# print("Final hidden weights: ", end='')
+# print(*hidden_weights)
+# print("Final hidden bias: ", end='')
+# print(*hidden_bias)
+# print("Final output weights: ", end='')
+# print(*output_weights)
+# print("Final output bias: ", end='')
+# print(*output_bias)
 
 print("\nOutput from neural network after 10,000 epochs: ", end='')
 print(*predicted_output)
 
-fig = px.line(x=accuracy[0], y=accuracy[1])
-fig.show()
+# fig = px.line(x=accuracy[0], y=accuracy[1])
+# fig.show()
